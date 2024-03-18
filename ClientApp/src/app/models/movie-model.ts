@@ -10,3 +10,9 @@ export interface MovieModel {
     genre?: string;
     posterUrl?:string;
 }
+
+export interface MoviePageModel{
+    movies: MovieModel[];
+    totalCount:number;
+    totalPages:number;
+}

@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { MOVIE_BASE_URL } from '../app.config';
 import { GenreModel } from '../models/genre-model';
-import { MovieModel } from '../models/movie-model';
+import { MovieModel, MoviePageModel } from '../models/movie-model';
 
 export interface ODataResponse<T> {
   value: T[];
@@ -20,37 +20,22 @@ export class MovieService {
   ) {}
 
 
-  public getMovies(nameFilter?:string,genreFilter?:string, pageSize:number=10, pageNumber:number=1, orderBy:string='Title'):Observable<MovieModel[]>{
+  public getMovies(nameFilter?:string,genreFilter?:string, pageSize:number=10, pageNumber:number=1, orderBy:string='Title,ReleaseDate'):Observable<MoviePageModel>{
     let params = new HttpParams();
-    if (nameFilter && genreFilter) {
-      params = params.set(
-        '$filter',
-        `contains(Title, '${nameFilter}') and contains(Genre, '${genreFilter}')`
-      );
+    if (nameFilter ) {
+      params = params.set('name',nameFilter);
     }
-    else if(nameFilter && !genreFilter){
-      params = params.set(
-        '$filter',
-        `contains(Title, '${nameFilter}')`
-      );
+    if (genreFilter) {
+      params = params.set('genre',genreFilter);
     }
-    else if(!nameFilter && genreFilter){
-      params = params.set(
-        '$filter',
-        `contains(Genre, '${genreFilter}')`
-      );
-    }
-    let skipCount= (pageNumber-1)* pageSize;
-    //params = params.set('$count', 'true');
-    params = params.set('$top', pageSize);
-    if(skipCount>0){
-      params = params.set('$skip', skipCount);
-    }
-    
-    params = params.set('$orderby', orderBy);
+    pageNumber=pageNumber>0?pageNumber:1;
+    params = params.set('page', pageNumber);
+    params = params.set('limit', pageSize);
+    params=params.set('sort',orderBy)
+
 
     return this.httpClient
-      .get<MovieModel[]>(`${this.baseUrl}/GetMovies`, { params });
+      .get<MoviePageModel>(`${this.baseUrl}/GetMovies`, {params: params} );
   }
   public getGenre():Observable<GenreModel[]>{
     return this.httpClient

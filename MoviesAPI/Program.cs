@@ -1,9 +1,13 @@
 
 using Microsoft.EntityFrameworkCore;
-using MoviesAPI.Models;
 using Microsoft.AspNetCore.OData.Extensions;
 using Humanizer;
 using Microsoft.AspNetCore.OData;
+using MoviesAPI.Context;
+using MoviesAPI.Repository;
+using MoviesAPI.Repository.Interface;
+using MoviesAPI.Service.Interface;
+using MoviesAPI.Service;
 
 namespace MoviesAPI
 {
@@ -33,6 +37,8 @@ builder.Services.AddCors(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
 );
 
+            builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+            builder.Services.AddScoped<IMovieService, MovieService>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

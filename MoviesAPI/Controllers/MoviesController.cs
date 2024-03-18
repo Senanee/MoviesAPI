@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
+using MoviesAPI.Context;
+using MoviesAPI.Dtos;
 using MoviesAPI.Models;
+using MoviesAPI.Service.Interface;
 
 namespace MoviesAPI.Controllers
 {
@@ -14,65 +17,19 @@ namespace MoviesAPI.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        private readonly MoviesContext _context;
+        private readonly IMovieService _movieService;
 
-        public MoviesController(MoviesContext context)
+        public MoviesController(IMovieService movieService)
         {
-            _context = context;
+            _movieService  = movieService;
         }
 
         [HttpGet]
-        [EnableQuery]
         [Route("[action]")]
-        public  IActionResult GetMovies()
+        public async Task<IActionResult> GetMovies(string? name, string? genre, string? sort, int page=1, int limit=100)
         {
-            return Ok(  _context.Movies.AsQueryable());
-        }
-
-
-        [HttpGet]
-        
-        [Route("[action]")]
-        public async Task<IActionResult> GetMovie([FromQuery] int id)
-        {
-            var movie = await _context.Movies.FindAsync(id);
-
-            if (movie == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(movie);
-        }
-        
-        [HttpGet]
-        [EnableQuery]
-        [Route("[action]")]
-        public async Task<IActionResult> GetMovieByName([FromQuery] string name)
-        {
-            List<Movie> movie = await _context.Movies.Where(x=>x.Title.ToLower().Contains(name.ToLower())).ToListAsync();
-
-            if (movie.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok(movie);
-        }
-
-        [HttpGet]
-        [EnableQuery]
-        [Route("[action]")]
-        public async Task<IActionResult> GetMovieByGenre([FromQuery] string genre)
-        {
-            List<Movie> movie = await _context.Movies.Where(x => x.Title.ToLower().Contains(genre.ToLower())).ToListAsync();
-
-            if (movie.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok(movie);
+            Dtos.PagedMoviesDto result = await _movieService.GetMovies(name, genre, sort, page, limit);
+            return Ok(result);
         }
 
         [HttpGet]
@@ -80,7 +37,7 @@ namespace MoviesAPI.Controllers
         public async Task<IActionResult> GetGenreList()
         {
 
-            List<AvailableGenre> genre =   await _context.AvailableGenres.ToListAsync();
+            List<AvailableGenreDto> genre =   await _movieService.GetGenreList();
 
             if (!genre.Any())
             {
@@ -88,10 +45,6 @@ namespace MoviesAPI.Controllers
             }
 
             return Ok(genre);
-        }
-        private bool MovieExists(int id)
-        {
-            return _context.Movies.Any(e => e.Id == id);
         }
     }
 }

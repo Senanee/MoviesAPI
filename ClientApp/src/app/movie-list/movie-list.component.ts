@@ -9,7 +9,7 @@ import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
 import { MatSortModule } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MovieModel } from '../models/movie-model';
+import { MovieModel, MoviePageModel } from '../models/movie-model';
 import { FormBuilder } from '@angular/forms';
 
 
@@ -44,8 +44,7 @@ export class MovieListComponent implements OnInit {
   pageSizes = [10, 50, 100];
   public genreList: string[] = [];
   public genre: string = '';
-  isLoading = false;
-  public pageSize=100;
+  public pageSize = 10;
   constructor(private moviesService: MovieService, private formBuilder: FormBuilder) { }
   ngOnInit(): void {
     this.moviesService.getGenre()
@@ -63,14 +62,15 @@ export class MovieListComponent implements OnInit {
       .pipe(
         startWith({}),
         switchMap(() => {
-          this.isLoading = true;
-          this.pageSize=this.paginator.pageSize
+          
+          this.pageSize = this.paginator.pageSize
           return this.moviesService.getMovies(this.searchStr, this.genre, this.paginator.pageSize, this.paginator.pageIndex + 1, 'Title');
         })
       )
-      .subscribe((movieData: MovieModel[]) => {
-        this.isLoading = false;
-        this.movieData = movieData;
+      .subscribe((response:MoviePageModel) => {
+        console.log(response);
+        this.totalData = response.totalCount
+        this.movieData = response.movies;
         this.dataSource = new MatTableDataSource(this.movieData);
       });
 
@@ -80,12 +80,13 @@ export class MovieListComponent implements OnInit {
       distinctUntilChanged(),
       switchMap(name => {
         this.searchStr = name ?? '';
-        this.isLoading=true;
+
         return this.moviesService.getMovies(this.searchStr, this.genre, this.pageSize, this.paginator.pageIndex, 'Title')
       })
-    ).subscribe((movieData: MovieModel[]) => {
-      this.isLoading = false;
-      this.movieData = movieData;
+    )    .subscribe((response:MoviePageModel) => {
+      console.log(response);
+      this.totalData = response.totalCount
+      this.movieData = response.movies;
       this.dataSource = new MatTableDataSource(this.movieData);
     });
   }
@@ -93,10 +94,11 @@ export class MovieListComponent implements OnInit {
   filterByGenre(e: any) {
     this.searchForm.controls['genreFilter'].setValue(e.target.value, { onlySelf: true });
     this.genre = e.target.value !== 'All' ? e.target.value : '';
-    this.isLoading = true;
-    this.moviesService.getMovies(this.searchStr, this.genre, this.pageSize, this.paginator.pageIndex, 'Title').subscribe((movieData: MovieModel[]) => {
-      this.isLoading=false;
-      this.movieData = movieData;
+    this.moviesService.getMovies(this.searchStr, this.genre, this.pageSize, this.paginator.pageIndex, 'Title')
+    .subscribe((response:MoviePageModel) => {
+      console.log(response);
+      this.totalData = response.totalCount
+      this.movieData = response.movies;
       this.dataSource = new MatTableDataSource(this.movieData);
     });
   }

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using MoviesAPI.Models;
 
-namespace MoviesAPI.Models;
+namespace MoviesAPI.Context;
 
 public partial class MoviesContext : DbContext
 {

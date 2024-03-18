@@ -79,5 +79,5 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
 </table>
-<mat-progress-spinner mode="indeterminate" *ngIf="isLoading"></mat-progress-spinner>
+<!-- <mat-progress-spinner mode="indeterminate" *ngIf="isLoading"></mat-progress-spinner> -->
 <mat-paginator #paginator [length]="totalData" [pageSize]="pageSize" [pageSizeOptions]="pageSizes" showFirstLastButtons></mat-paginator>
