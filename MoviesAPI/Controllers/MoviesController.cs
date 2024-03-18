@@ -28,8 +28,18 @@ namespace MoviesAPI.Controllers
         [Route("[action]")]
         public async Task<IActionResult> GetMovies(string? name, string? genre, string? sort, int page=1, int limit=100)
         {
-            Dtos.PagedMoviesDto result = await _movieService.GetMovies(name, genre, sort, page, limit);
-            return Ok(result);
+            if(page <1 || limit > 100)
+            {
+                return BadRequest("Please check pageIndex and page limit");
+            }
+            try
+            {
+                Dtos.PagedMoviesDto result = await _movieService.GetMovies(name, genre, sort, page, limit);
+                return Ok(result);
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
