@@ -11,13 +11,23 @@ namespace MoviesAPI
     {
         public static void Main(string[] args)
         {
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
             var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins, builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
             // Add services to the container.
 
             builder.Services.AddControllers().AddOData(option => { 
                 option.Select().Expand().Filter().OrderBy().SetMaxTop(100).Count();
             });
+            
 
             builder.Services.AddDbContext<MoviesContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
@@ -36,9 +46,9 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
                 app.UseSwaggerUI();
             }
 
+            app.UseCors(MyAllowSpecificOrigins);
 
-
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthorization();
 

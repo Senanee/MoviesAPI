@@ -21,7 +21,6 @@ namespace MoviesAPI.Controllers
             _context = context;
         }
 
-        // GET: api/Movies
         [HttpGet]
         [EnableQuery]
         [Route("[action]")]
@@ -30,7 +29,7 @@ namespace MoviesAPI.Controllers
             return Ok(  _context.Movies.AsQueryable());
         }
 
-        // GET: api/Movies/5
+
         [HttpGet]
         
         [Route("[action]")]
@@ -51,7 +50,7 @@ namespace MoviesAPI.Controllers
         [Route("[action]")]
         public async Task<IActionResult> GetMovieByName([FromQuery] string name)
         {
-            List<Movie> movie = await _context.Movies.Where(x=>x.Title.Contains(name, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
+            List<Movie> movie = await _context.Movies.Where(x=>x.Title.ToLower().Contains(name.ToLower())).ToListAsync();
 
             if (movie.Count == 0)
             {
@@ -66,7 +65,7 @@ namespace MoviesAPI.Controllers
         [Route("[action]")]
         public async Task<IActionResult> GetMovieByGenre([FromQuery] string genre)
         {
-            List<Movie> movie = await _context.Movies.Where(x => x.Title.Contains(genre, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
+            List<Movie> movie = await _context.Movies.Where(x => x.Title.ToLower().Contains(genre.ToLower())).ToListAsync();
 
             if (movie.Count == 0)
             {
